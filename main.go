@@ -9,10 +9,22 @@ import (
 )
 
 func main() {
-	data, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		fmt.Println(err)
-		return
+	var data []byte
+
+	if len(os.Args) < 2 {
+		content, err := ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		data = content
+	} else {
+		fileContent, readFileErr := ioutil.ReadFile(os.Args[1])
+		if readFileErr != nil {
+			fmt.Println(readFileErr)
+			return
+		}
+		data = fileContent
 	}
 
 	if string(data) == "" {
