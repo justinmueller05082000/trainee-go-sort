@@ -12,6 +12,7 @@ import (
 
 func main() {
 	numericParameter := flag.Bool("n", false, "Sort numbers from lowest to highest")
+	writingParameter := flag.String("o", "", "Save result into a file")
 	flag.Parse()
 
 	var data []byte
@@ -70,5 +71,13 @@ func main() {
 		}
 	}
 	dataJoin := bytes.Join(dataSplit, []byte("\n"))
-	fmt.Printf("%s\n", strings.TrimPrefix(string(dataJoin), "\n"))
+
+	if *writingParameter != "" {
+		writeErr := ioutil.WriteFile(*writingParameter, []byte(strings.TrimPrefix(string(dataJoin), "\n")+"\n"), 0644)
+		if writeErr != nil {
+			fmt.Println(writeErr)
+		}
+	} else {
+		fmt.Printf("%s\n", strings.TrimPrefix(string(dataJoin), "\n"))
+	}
 }
