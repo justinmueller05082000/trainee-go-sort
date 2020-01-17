@@ -13,6 +13,7 @@ import (
 func main() {
 	numericParameter := flag.Bool("n", false, "Sort numbers from lowest to highest")
 	writingParameter := flag.String("o", "", "Save result into a file")
+	uniqueParameter := flag.Bool("u", false, "Output only the first of an equal run")
 	flag.Parse()
 
 	var data []byte
@@ -38,6 +39,17 @@ func main() {
 	}
 
 	dataSplit := bytes.Split(data, []byte("\n"))
+
+	if *uniqueParameter {
+		duplicates := make(map[string]struct{})
+		for _, v := range dataSplit {
+			duplicates[string(v)] = struct{}{}
+		}
+		dataSplit = nil
+		for b := range duplicates {
+			dataSplit = append(dataSplit, []byte(b))
+		}
+	}
 	lengthOfData := len(dataSplit)
 
 	for i := 0; i < lengthOfData; i++ {
