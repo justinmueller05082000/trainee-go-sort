@@ -20,14 +20,14 @@ func main() {
 	if len(flag.Args()) < 1 {
 		content, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			return
 		}
 		data = content
 	} else {
 		fileContent, readFileErr := ioutil.ReadFile(flag.Args()[0])
 		if readFileErr != nil {
-			fmt.Println(readFileErr)
+			fmt.Fprintln(os.Stderr, readFileErr)
 			return
 		}
 		data = fileContent
@@ -53,12 +53,12 @@ func main() {
 			} else {
 				comparer1, convertErr1 := strconv.Atoi(string(dataSplit[j]))
 				if convertErr1 != nil {
-					fmt.Println(convertErr1)
+					fmt.Fprintln(os.Stderr, convertErr1)
 					return
 				}
 				comparer2, convertErr2 := strconv.Atoi(string(dataSplit[j-1]))
 				if convertErr2 != nil {
-					fmt.Println(convertErr2)
+					fmt.Fprintln(os.Stderr, convertErr2)
 					return
 				}
 				if comparer1 < comparer2 {
@@ -75,7 +75,7 @@ func main() {
 	if *writingParameter != "" {
 		writeErr := ioutil.WriteFile(*writingParameter, []byte(strings.TrimPrefix(string(dataJoin), "\n")+"\n"), 0644)
 		if writeErr != nil {
-			fmt.Println(writeErr)
+			fmt.Fprintln(os.Stderr, writeErr)
 		}
 	} else {
 		fmt.Printf("%s\n", strings.TrimPrefix(string(dataJoin), "\n"))
