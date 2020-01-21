@@ -8,12 +8,14 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 func main() {
 	numericParameter := flag.Bool("n", false, "Sort numbers from lowest to highest")
 	writingParameter := flag.String("o", "", "Save result into a file")
 	uniqueParameter := flag.Bool("u", false, "Output only the first of an equal run")
+	leadingBlanksParameter := flag.Bool("b", false, "Ignore leading blanks")
 	flag.Parse()
 
 	var data []byte
@@ -39,6 +41,12 @@ func main() {
 	}
 
 	dataSplit := bytes.Split(data, []byte("\n"))
+
+	if *leadingBlanksParameter {
+		for v := range dataSplit {
+			dataSplit[v] = bytes.TrimLeftFunc(dataSplit[v], unicode.IsSpace)
+		}
+	}
 
 	if *uniqueParameter {
 		duplicates := make(map[string]struct{})
