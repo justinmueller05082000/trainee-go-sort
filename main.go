@@ -16,6 +16,7 @@ func main() {
 	writingParameter := flag.String("o", "", "Save result into a file")
 	uniqueParameter := flag.Bool("u", false, "Output only the first of an equal run")
 	leadingBlanksParameter := flag.Bool("b", false, "Ignore leading blanks")
+	ignoreCaseParameter := flag.Bool("f", false, "Fold lower case to upper case characters")
 	flag.Parse()
 
 	var data []byte
@@ -38,6 +39,10 @@ func main() {
 
 	if string(data) == "" {
 		return
+	}
+
+	if *ignoreCaseParameter {
+		data = []byte(strings.ToUpper(string(data)))
 	}
 
 	dataSplit := bytes.Split(data, []byte("\n"))
