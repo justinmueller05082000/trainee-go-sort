@@ -5,9 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -17,6 +19,7 @@ func main() {
 	uniqueParameter := flag.Bool("u", false, "Output only the first of an equal run")
 	leadingBlanksParameter := flag.Bool("b", false, "Ignore leading blanks")
 	ignoreCaseParameter := flag.Bool("f", false, "Fold lower case to upper case characters")
+	randomSortingParameter := flag.Bool("R", false, "shuffle, but group identical keys.")
 	flag.Parse()
 
 	var data []byte
@@ -64,18 +67,19 @@ func main() {
 		}
 	}
 	lengthOfData := len(dataSplit)
+	rand.Seed(time.Now().UnixNano())
 
 	for i := 0; i < lengthOfData; i++ {
 		j := i
 		for j > 0 {
-			if !*numericParameter {
-				if bytes.Compare(dataSplit[j], dataSplit[j-1]) < 0 {
+			if *randomSortingParameter {
+				if rand.Intn(2) == 1 {
 					dataSplit[j], dataSplit[j-1] = dataSplit[j-1], dataSplit[j]
 					j -= 1
 				} else {
 					break
 				}
-			} else {
+			} else if *numericParameter {
 				comparer1, convertErr1 := strconv.Atoi(string(dataSplit[j]))
 				if convertErr1 != nil {
 					fmt.Fprintln(os.Stderr, convertErr1)
@@ -87,6 +91,13 @@ func main() {
 					os.Exit(1)
 				}
 				if comparer1 < comparer2 {
+					dataSplit[j], dataSplit[j-1] = dataSplit[j-1], dataSplit[j]
+					j -= 1
+				} else {
+					break
+				}
+			} else {
+				if bytes.Compare(dataSplit[j], dataSplit[j-1]) < 0 {
 					dataSplit[j], dataSplit[j-1] = dataSplit[j-1], dataSplit[j]
 					j -= 1
 				} else {
