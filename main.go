@@ -22,6 +22,8 @@ func main() {
 	randomSortingParameter := flag.Bool("R", false, "shuffle, but group identical keys.")
 	flag.Parse()
 
+	var comparator func(a, b []byte) int
+
 	var data []byte
 
 	if len(flag.Args()) < 1 {
@@ -66,44 +68,21 @@ func main() {
 			dataSplit = append(dataSplit, []byte(b))
 		}
 	}
-	lengthOfData := len(dataSplit)
-	rand.Seed(time.Now().UnixNano())
 
-	for i := 0; i < lengthOfData; i++ {
+	if *randomSortingParameter {
+		comparator = randomComparator
+		rand.Seed(time.Now().UnixNano())
+	} else if *numericParameter {
+		comparator = numberComparator
+	} else {
+		comparator = bytes.Compare
+	}
+
+	for i := 0; i < len(dataSplit); i++ {
 		j := i
-		for j > 0 {
-			if *randomSortingParameter {
-				if rand.Intn(2) == 1 {
-					dataSplit[j], dataSplit[j-1] = dataSplit[j-1], dataSplit[j]
-					j -= 1
-				} else {
-					break
-				}
-			} else if *numericParameter {
-				comparer1, convertErr1 := strconv.Atoi(string(dataSplit[j]))
-				if convertErr1 != nil {
-					fmt.Fprintln(os.Stderr, convertErr1)
-					os.Exit(1)
-				}
-				comparer2, convertErr2 := strconv.Atoi(string(dataSplit[j-1]))
-				if convertErr2 != nil {
-					fmt.Fprintln(os.Stderr, convertErr2)
-					os.Exit(1)
-				}
-				if comparer1 < comparer2 {
-					dataSplit[j], dataSplit[j-1] = dataSplit[j-1], dataSplit[j]
-					j -= 1
-				} else {
-					break
-				}
-			} else {
-				if bytes.Compare(dataSplit[j], dataSplit[j-1]) < 0 {
-					dataSplit[j], dataSplit[j-1] = dataSplit[j-1], dataSplit[j]
-					j -= 1
-				} else {
-					break
-				}
-			}
+		for j > 0 && comparator(dataSplit[j], dataSplit[j-1]) < 0 {
+			dataSplit[j], dataSplit[j-1] = dataSplit[j-1], dataSplit[j]
+			j -= 1
 		}
 	}
 	dataJoin := bytes.Join(dataSplit, []byte("\n"))
@@ -117,4 +96,22 @@ func main() {
 	} else {
 		fmt.Printf("%s\n", strings.TrimPrefix(string(dataJoin), "\n"))
 	}
+}
+
+func numberComparator(a, b []byte) int {
+	comparer1, convertErr1 := strconv.Atoi(string(a))
+	if convertErr1 != nil {
+		fmt.Fprintln(os.Stderr, convertErr1)
+		os.Exit(1)
+	}
+	comparer2, convertErr2 := strconv.Atoi(string(b))
+	if convertErr2 != nil {
+		fmt.Fprintln(os.Stderr, convertErr2)
+		os.Exit(1)
+	}
+	return comparer1 - comparer2
+}
+
+func randomComparator(a, b []byte) int {
+	return rand.Intn(3) - 1
 }
