@@ -20,6 +20,7 @@ func main() {
 	leadingBlanksParameter := flag.Bool("b", false, "Ignore leading blanks")
 	ignoreCaseParameter := flag.Bool("f", false, "Fold lower case to upper case characters")
 	randomSortingParameter := flag.Bool("R", false, "shuffle, but group identical keys.")
+	reversePrintingParameter := flag.Bool("r", false, "Print result in reverse order")
 	flag.Parse()
 
 	var comparator func(a, b []byte) int
@@ -78,6 +79,10 @@ func main() {
 		comparator = bytes.Compare
 	}
 
+	if *reversePrintingParameter {
+		comparator = wrapReverse(comparator)
+	}
+
 	for i := 0; i < len(dataSplit); i++ {
 		j := i
 		for j > 0 && comparator(dataSplit[j], dataSplit[j-1]) < 0 {
@@ -114,4 +119,10 @@ func numberComparator(a, b []byte) int {
 
 func randomComparator(a, b []byte) int {
 	return rand.Intn(3) - 1
+}
+
+func wrapReverse(f func(a, b []byte) int) func(a, b []byte) int {
+	return func(a, b []byte) int {
+		return -f(a, b)
+	}
 }
