@@ -53,6 +53,10 @@ func main() {
 
 	dataSplit := bytes.Split(data, []byte("\n"))
 
+	if len(dataSplit[len(dataSplit)-1]) <= 0 {
+		dataSplit = dataSplit[:len(dataSplit)-1]
+	}
+
 	if *leadingBlanksParameter {
 		for v := range dataSplit {
 			dataSplit[v] = bytes.TrimLeftFunc(dataSplit[v], unicode.IsSpace)
@@ -93,13 +97,13 @@ func main() {
 	dataJoin := bytes.Join(dataSplit, []byte("\n"))
 
 	if *writingParameter != "" {
-		writeErr := ioutil.WriteFile(*writingParameter, []byte(strings.TrimPrefix(string(dataJoin), "\n")+"\n"), 0644)
+		writeErr := ioutil.WriteFile(*writingParameter, []byte(string(dataJoin)+"\n"), 0644)
 		if writeErr != nil {
 			fmt.Fprintln(os.Stderr, writeErr)
 			os.Exit(1)
 		}
 	} else {
-		fmt.Printf("%s\n", strings.TrimPrefix(string(dataJoin), "\n"))
+		fmt.Printf("%s\n", string(dataJoin))
 	}
 }
 
