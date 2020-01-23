@@ -8,7 +8,6 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 	"unicode"
 )
@@ -43,15 +42,15 @@ func main() {
 		data = fileContent
 	}
 
-	if string(data) == "" {
+	if len(data) <= 0 {
 		return
 	}
 
 	if *ignoreCaseParameter {
-		data = []byte(strings.ToUpper(string(data)))
+		data = bytes.ToUpper(data)
 	}
 
-	dataSplit := bytes.Split(data, []byte("\n"))
+	dataSplit := bytes.Split(data, []byte{'\n'})
 
 	if len(dataSplit[len(dataSplit)-1]) <= 0 {
 		dataSplit = dataSplit[:len(dataSplit)-1]
@@ -94,10 +93,10 @@ func main() {
 			j -= 1
 		}
 	}
-	dataJoin := bytes.Join(dataSplit, []byte("\n"))
+	dataJoin := bytes.Join(dataSplit, []byte{'\n'})
 
 	if *writingParameter != "" {
-		writeErr := ioutil.WriteFile(*writingParameter, []byte(string(dataJoin)+"\n"), 0644)
+		writeErr := ioutil.WriteFile(*writingParameter, append(dataJoin,'\n'), 0644)
 		if writeErr != nil {
 			fmt.Fprintln(os.Stderr, writeErr)
 			os.Exit(1)
