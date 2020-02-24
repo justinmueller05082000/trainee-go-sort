@@ -22,6 +22,7 @@ func main() {
 	ignoreCaseParameter := flag.Bool("f", false, "Fold lower case to upper case characters")
 	randomSortingParameter := flag.Bool("R", false, "shuffle, but group identical keys.")
 	reversePrintingParameter := flag.Bool("r", false, "Print result in reverse order")
+	quickSortParameter := flag.Bool("qsort", false, "Use quick sort")
 	flag.Parse()
 
 	var comparator func(a, b []byte) int
@@ -88,13 +89,12 @@ func main() {
 		comparator = wrapReverse(comparator)
 	}
 
-	for i := 0; i < len(dataSplit); i++ {
-		j := i
-		for j > 0 && comparator(dataSplit[j], dataSplit[j-1]) < 0 {
-			dataSplit[j], dataSplit[j-1] = dataSplit[j-1], dataSplit[j]
-			j -= 1
-		}
+	if *quickSortParameter {
+		quickSort(dataSplit, comparator)
+	} else {
+		bubbleSort(dataSplit, comparator)
 	}
+
 	dataJoin := bytes.Join(dataSplit, []byte{'\n'})
 
 	if *writingParameter != "" {
@@ -130,4 +130,40 @@ func wrapReverse(f func(a, b []byte) int) func(a, b []byte) int {
 	return func(a, b []byte) int {
 		return -f(a, b)
 	}
+}
+
+func quickSort(input [][]byte, comp func(a, b []byte) int) [][]byte {
+	if len(input) < 2 {
+		return input
+	}
+
+	left, right := 0, len(input)-1
+	pivot := rand.Int() % len(input)
+	input[pivot], input[right] = input[right], input[pivot]
+
+	for i := range input {
+		if comp(input[i], input[right]) < 0 {
+			input[left], input[i] = input[i], input[left]
+			left++
+		}
+	}
+
+	input[left], input[right] = input[right], input[left]
+
+	quickSort(input[:left], comp)
+	quickSort(input[left+1:], comp)
+
+	return input
+}
+
+func bubbleSort(input [][]byte, comp func(a, b []byte) int) [][]byte {
+	for i := 0; i < len(input); i++ {
+		j := i
+		for j > 0 && comp(input[j], input[j-1]) < 0 {
+			input[j], input[j-1] = input[j-1], input[j]
+			j -= 1
+		}
+	}
+
+	return input
 }
