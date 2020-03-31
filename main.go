@@ -23,6 +23,7 @@ func main() {
 	randomSortingParameter := flag.Bool("R", false, "shuffle, but group identical keys.")
 	reversePrintingParameter := flag.Bool("r", false, "Print result in reverse order")
 	quickSortParameter := flag.Bool("qsort", false, "Use quick sort")
+	mergeSortParameter := flag.Bool("mergesort", false, "Use merge sort")
 	flag.Parse()
 
 	var comparator func(a, b []byte) int
@@ -91,6 +92,8 @@ func main() {
 
 	if *quickSortParameter {
 		quickSort(dataSplit, comparator)
+	} else if *mergeSortParameter {
+		dataSplit = mergeSort(dataSplit, comparator)
 	} else {
 		bubbleSort(dataSplit, comparator)
 	}
@@ -166,4 +169,41 @@ func bubbleSort(input [][]byte, comp func(a, b []byte) int) [][]byte {
 	}
 
 	return input
+}
+
+func mergeSort(input [][]byte, comp func(a, b []byte) int) [][]byte {
+	if len(input) < 2 {
+		return input
+	}
+
+	middle := len(input) / 2
+
+	return merge(mergeSort(input[:middle], comp), mergeSort(input[middle:], comp), comp)
+}
+
+func merge(left, right [][]byte, comp func(a, b []byte) int) (result [][]byte) {
+	result = make([][]byte, len(left)+len(right))
+
+	i := 0
+	for len(left) > 0 && len(right) > 0 {
+		if comp(left[0], right[0]) < 0 {
+			result[i] = left[0]
+			left = left[1:]
+		} else {
+			result[i] = right[0]
+			right = right[1:]
+		}
+		i++
+	}
+
+	for j := 0; j < len(left); j++ {
+		result[i] = left[j]
+		i++
+	}
+	for j := 0; j < len(right); j++ {
+		result[i] = right[j]
+		i++
+	}
+
+	return
 }
