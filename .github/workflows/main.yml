@@ -1,0 +1,13 @@
+on: [push, pull_request]
+name: Build
+jobs:
+  build:
+    name: Go Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: aix/ppc64
+        uses: shoukoo/golang-pipeline@0.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOOS: aix
+          GOARCH: ppc64
